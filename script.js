@@ -1,5 +1,5 @@
 /**
- * Shaik Nafeesa Khaisar - Premium AI & Embedded Systems R&D Portfolio JS
+ * Shaik Nafeesa - Premium AI & Embedded Systems R&D Portfolio JS
  */
 
 document.addEventListener('DOMContentLoaded', () => {
