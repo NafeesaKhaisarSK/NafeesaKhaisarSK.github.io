@@ -1996,6 +1996,9 @@ footer {
     gap: 15px;
     padding: 18px 20px;
     cursor: pointer;
+    will-change: transform;
+    content-visibility: auto;
+    contain-intrinsic-size: 80px;
 }
 .proof-card.hover-glow:hover {
     transform: translateY(-4px) scale(1.02);
@@ -2051,16 +2054,56 @@ footer {
         gap: 15px;
     }
     .proofs-tabs {
-        gap: 8px;
+        display: flex;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        justify-content: flex-start !important;
+        width: 100%;
+        padding: 5px 15px 15px !important;
+        gap: 10px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Hide scrollbar for Firefox */
+    }
+    .proofs-tabs::-webkit-scrollbar {
+        display: none; /* Hide scrollbar for Chrome/Safari */
     }
     .proofs-tabs .tab-btn {
         padding: 8px 16px;
         font-size: 0.82rem;
+        flex-shrink: 0;
     }
     .proofs-grid {
         grid-template-columns: 1fr;
         gap: 15px;
     }
+}
+
+/* Load More Controls */
+.proofs-load-more-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+    transition: var(--transition-smooth);
+}
+.proofs-load-more-container.hidden {
+    display: none !important;
+}
+#proofs-load-more-btn {
+    padding: 14px 35px;
+    border-radius: 30px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: var(--shadow-glow-inset);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-glass);
+    transition: var(--transition-smooth);
+}
+#proofs-load-more-btn:hover {
+    background: linear-gradient(135deg, rgba(0, 242, 254, 0.1), rgba(79, 172, 254, 0.1));
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.2);
+    color: var(--accent-cyan);
+    transform: scale(1.02);
 }
 
 /* ==========================================================================

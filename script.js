@@ -380,12 +380,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const proofsGrid = document.getElementById('proofs-grid');
     const searchInput = document.getElementById('proofs-search');
     const tabButtons = document.querySelectorAll('.proofs-tabs .tab-btn');
+    const loadMoreContainer = document.getElementById('proofs-load-more-container');
+    const loadMoreBtn = document.getElementById('proofs-load-more-btn');
+
+    const ITEMS_PER_PAGE = 12;
+    let currentLimit = ITEMS_PER_PAGE;
+
+    // Debounce helper for high-frequency operations like search input typing
+    const debounce = (func, delay) => {
+        let timeoutId;
+        return (...args) => {
+            if (timeoutId) clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                func.apply(null, args);
+            }, delay);
+        };
+    };
+
+    // Toggle Load More Button Visibility
+    const toggleLoadMoreButton = (visible) => {
+        if (!loadMoreContainer) return;
+        if (visible) {
+            loadMoreContainer.classList.remove('hidden');
+        } else {
+            loadMoreContainer.classList.add('hidden');
+        }
+    };
 
     // Render Function
     const renderProofs = (filterCategory = 'all', searchQuery = '') => {
         if (!proofsGrid) return;
-        
-        proofsGrid.innerHTML = '';
         
         // Filter Data
         const filtered = proofsList.filter(item => {
@@ -405,13 +429,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p style="margin-top: 5px; font-size: 0.95rem; color: var(--text-muted);">Try broadening your keywords or checking other categories.</p>
                 </div>
             `;
+            toggleLoadMoreButton(false);
             return;
         } else {
             proofsGrid.style.display = 'grid';
         }
 
+        // Get subset based on currentLimit
+        const paginatedItems = filtered.slice(0, currentLimit);
+        
+        proofsGrid.innerHTML = '';
+        
         // Generate Cards
-        filtered.forEach(item => {
+        paginatedItems.forEach(item => {
             const card = document.createElement('a');
             card.className = 'proof-card glass-card hover-glow';
             card.target = '_blank';
@@ -447,17 +477,36 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             proofsGrid.appendChild(card);
         });
+
+        // Show/hide Load More Button
+        toggleLoadMoreButton(filtered.length > currentLimit);
     };
 
     // Initialize rendering
     renderProofs();
 
+    // Load More click action
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', () => {
+            currentLimit += ITEMS_PER_PAGE;
+            const activeTab = document.querySelector('.proofs-tabs .tab-btn.active');
+            const category = activeTab ? activeTab.getAttribute('data-category') : 'all';
+            const query = searchInput ? searchInput.value : '';
+            renderProofs(category, query);
+        });
+    }
+
     // Event Listeners for search & filters
     if (searchInput) {
+        const debouncedRender = debounce((category, query) => {
+            currentLimit = ITEMS_PER_PAGE; // Reset limit on search input
+            renderProofs(category, query);
+        }, 150);
+
         searchInput.addEventListener('input', (e) => {
             const activeTab = document.querySelector('.proofs-tabs .tab-btn.active');
             const category = activeTab ? activeTab.getAttribute('data-category') : 'all';
-            renderProofs(category, e.target.value);
+            debouncedRender(category, e.target.value);
         });
     }
 
@@ -467,10 +516,16 @@ document.addEventListener('DOMContentLoaded', () => {
             tabButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             
+            // Reset limit on tab change
+            currentLimit = ITEMS_PER_PAGE;
+            
             // Render filtered grid
             const category = btn.getAttribute('data-category');
             const query = searchInput ? searchInput.value : '';
             renderProofs(category, query);
+
+            // On mobile/tablet devices, smoothly scroll active button into view horizontally
+            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         });
     });
 
